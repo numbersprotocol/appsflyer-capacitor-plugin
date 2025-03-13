@@ -14,10 +14,18 @@
 
 ### <a id="plugin-build-for"> This plugin is built for
 
-- Android AppsFlyer SDK **6.10.3**
-- iOS AppsFlyer SDK **6.10.1**
+- Android AppsFlyer SDK **6.15.2**
+- iOS AppsFlyer SDK **6.15.3**
 
-## <a id="breaking-changes"> 	❗❗ Breaking changes when updating to v6.9.2❗❗
+## <a id="breaking-changes-6-15-0"> 	❗❗ Breaking changes when updating to v6.15.0 ❗❗
+Starting from v6.15.0, this plugin works only with Capacitor 6. </br>
+If you are still interested in using Capacitor 5, please follow the instructions [here](/docs/Installation.md#cap5) to install the latest version that supports Capacitor 5.
+
+## <a id="breaking-changes-6-12-1"> 	❗❗ Breaking changes when updating to v6.12.1 ❗❗
+Starting from v6.12.1, this plugin works only with Capacitor 5. </br>
+If you are still interested in using Capacitor 4, please follow the instructions [here](/docs/Installation.md#cap4) to install the latest version that supports Capacitor 4.
+
+## <a id="breaking-changes"> 	❗❗ Breaking changes when updating to v6.9.2 ❗❗
 Starting from v6.9.2, this plugin works only with Capacitor 4. </br>
 If you are still interested in using Capacitor 3, please follow the instructions [here](/docs/Installation.md#cap3) to install the latest version that supports Capacitor 3.
 
@@ -31,9 +39,10 @@ If you are still interested in using Capacitor 3, please follow the instructions
 
  ##  📖 Guides
 - [Adding the SDK to your project](/docs/Installation.md)
-- [Initializing the SDK](/docs/BasicIntegration.md)
+- [Initializing The SDK](/docs/BasicIntegration.md)
 - [In-app Events](/docs/InAppEvents.md)
 - [Deep Linking](/docs/DeepLink.md)
 - [Advanced API](/docs/AdvancedAPI.md)
-- [Testing the integration](/docs/Testing.md)
+- [Testing The integration](/docs/Testing.md)
 - [API](/docs/API.md)
+- [Set Consent For DMA Compliance](/docs/DMA.md)

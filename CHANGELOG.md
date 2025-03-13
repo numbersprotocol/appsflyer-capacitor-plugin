@@ -1,3 +1,46 @@
+## 6.15.2
+ Release date: *2024-10-27*
+
+- Capacitor Plugin 6.15.1 build error
+- Capacitor Plugin >> Android >> package.json recursive crawl modification
+
+## 6.15.2
+ Release date: *2024-10-27*
+
+- Capacitor Plugin 6.15.1 build error
+- Capacitor Plugin >> Android >> package.json recursive crawl modification
+
+## 6.15.1
+ Release date: *2024-08-28*
+
+- Capacitor >> Update Plugin to v6.15.1
+
+## 6.15.0
+ Release date: *2024-08-15*
+
+- Capacitor >> Update Plugin to v6.15.0
+- Capacitor >> Update to Capacitor v6
+
+## 6.14.3
+ Release date: *2024-05-01*
+
+- Capacitor >> Update Plugin to v6.14.3
+
+## 6.13.1
+ Release date: *2024-03-07*
+
+- Capacitor >> Update to iOS SDK v6.13.1
+
+## 6.13.0
+ Release date: *2024-02-26*
+
+- Capacitor >> MonoRepo structure project >> failed to build on Android since v6.10.3
+
+## 6.12.1
+ Release date: *2023-07-31*
+
+- Capacitor >> Update version to Capacitor v5
+
 ## 6.10.3
  Release date: *2023-05-01*
 
