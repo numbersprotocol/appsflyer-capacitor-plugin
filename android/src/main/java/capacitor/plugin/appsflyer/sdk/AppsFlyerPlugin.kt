@@ -4,12 +4,12 @@ import android.Manifest
 import android.content.Intent
 
 import com.appsflyer.*
-import com.appsflyer.capacitorjs.plugin.BuildConfig
 import com.appsflyer.attribution.AppsFlyerRequestListener
 import com.appsflyer.deeplink.DeepLinkListener
 import com.appsflyer.deeplink.DeepLinkResult
 import com.appsflyer.internal.platform_extension.PluginInfo
 import com.appsflyer.share.CrossPromotionHelper
+import com.appsflyer.share.LinkGenerator
 import com.appsflyer.share.ShareInviteHelper
 import com.getcapacitor.JSObject
 import com.getcapacitor.Plugin
@@ -49,6 +49,7 @@ class AppsFlyerPlugin : Plugin() {
         val devKey = call.getString(AF_DEV_KEY)
         val debug = call.getBoolean(AF_DEBUG, false)
         val minTime = call.getInt(AF_MIN_TIME)
+        val manualStart = call.getBoolean(AF_MANUAL_START, false)
         conversion = call.getBoolean(AF_CONVERSION_LISTENER, true)
         oaoa = call.getBoolean(AF_OAOA, true)
         udl = call.getBoolean(AF_UDL, false)
@@ -59,7 +60,7 @@ class AppsFlyerPlugin : Plugin() {
                 PluginInfo(
                     com.appsflyer.internal.platform_extension.Plugin.CAPACITOR,
                     BuildConfig.VERSION_NAME
-                   //, mapOf("build_number" to BuildConfig.VERSION_CODE.toString())
+                    //, mapOf("build_number" to BuildConfig.VERSION_CODE.toString())
                 )
             )
             if (debug == true) {
@@ -86,18 +87,15 @@ class AppsFlyerPlugin : Plugin() {
                     subscribeForDeepLink(getDeepLinkListener())
                 }
             }
-            start(activity ?: context.applicationContext, null, object : AppsFlyerRequestListener {
-                override fun onSuccess() {
-                    val ret = JSObject()
-                    ret.put("res", "ok")
-                    call.resolve(ret)
-                }
 
-                override fun onError(p0: Int, p1: String) {
-                    call.reject(p1, p0.toString())
+            if (manualStart == false) {
+                startSDK(call)
+            } else {
+                val result = JSObject().apply {
+                    put("res", "SDK initiated successfully. SDK has NOT been started yet")
                 }
-
-            })
+                call.resolve(result)
+            }
         }
 
     }
@@ -246,7 +244,7 @@ class AppsFlyerPlugin : Plugin() {
         }
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun getAppsFlyerUID(call: PluginCall) {
         val id = AppsFlyerLib.getInstance().getAppsFlyerUID(context)
         val obj = JSObject().apply {
@@ -269,7 +267,7 @@ class AppsFlyerPlugin : Plugin() {
         } ?: run { call.reject("Missing boolean value disable") }
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun stop(call: PluginCall) {
         val shouldStop = call.getBoolean(AF_STOP)
         AppsFlyerLib.getInstance().apply {
@@ -284,7 +282,24 @@ class AppsFlyerPlugin : Plugin() {
         }
     }
 
-    @PluginMethod()
+    @PluginMethod
+    fun startSDK(call: PluginCall) {
+        AppsFlyerLib.getInstance()
+            .start(activity ?: context.applicationContext, null, object : AppsFlyerRequestListener {
+                override fun onSuccess() {
+                    val result = JSObject().apply {
+                        put("res", "success")
+                    }
+                    call.resolve(result)
+                }
+
+                override fun onError(errCode: Int, msg: String) {
+                    call.reject("Error Code: $errCode, Message: $msg")
+                }
+            })
+    }
+
+    @PluginMethod
     fun disableSKAdNetwork(call: PluginCall) {
         call.unavailable()
     }
@@ -297,7 +312,7 @@ class AppsFlyerPlugin : Plugin() {
         } ?: run { call.reject("Missing boolean value shouldDisable") }
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun disableCollectASA(call: PluginCall) {
         call.unavailable()
     }
@@ -314,7 +329,7 @@ class AppsFlyerPlugin : Plugin() {
         }
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun generateInviteLink(call: PluginCall) {
 
         val linkGenerator = ShareInviteHelper.generateInviteUrl(context).apply {
@@ -329,7 +344,7 @@ class AppsFlyerPlugin : Plugin() {
 
         }
 
-        val listener = object : CreateOneLinkHttpTask.ResponseListener {
+        val listener = object : LinkGenerator.ResponseListener {
             override fun onResponse(s: String?) {
                 val obj = JSObject().apply {
                     put(AF_LINK_READY, s)
@@ -389,7 +404,7 @@ class AppsFlyerPlugin : Plugin() {
         }
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun getSdkVersion(call: PluginCall) {
         val v = AppsFlyerLib.getInstance().sdkVersion
         val obj = JSObject().apply {
@@ -398,7 +413,7 @@ class AppsFlyerPlugin : Plugin() {
         call.resolve(obj)
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun enableFacebookDeferredApplinks(call: PluginCall) {
         val b = call.getBoolean(AF_FB)
         if (b != null) {
@@ -413,7 +428,7 @@ class AppsFlyerPlugin : Plugin() {
         }
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun sendPushNotificationData(call: PluginCall) {
         val json = call.getObject(AF_PUSH_PAYLOAD)
         val i = activity.intent
@@ -425,7 +440,7 @@ class AppsFlyerPlugin : Plugin() {
 
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun logCrossPromoteImpression(call: PluginCall) {
         val appID =
             call.getString(AF_APP_ID) ?: return call.reject("cannot extract the appID value")
@@ -446,7 +461,7 @@ class AppsFlyerPlugin : Plugin() {
 
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun setUserEmails(call: PluginCall) {
         val emails = call.getArray(AF_EMAILS)?.run {
             toList<String>().toTypedArray()
@@ -467,7 +482,7 @@ class AppsFlyerPlugin : Plugin() {
 
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun logLocation(call: PluginCall) {
         val longitude =
             call.getDouble(AF_LONGITUDE) ?: return call.reject("cannot extract the longitude value")
@@ -480,7 +495,7 @@ class AppsFlyerPlugin : Plugin() {
 
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun setPhoneNumber(call: PluginCall) {
         val phone = call.getString(AF_PHONE) ?: return call.reject("cannot extract the phone value")
         AppsFlyerLib.getInstance().setPhoneNumber(phone)
@@ -490,7 +505,7 @@ class AppsFlyerPlugin : Plugin() {
 
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun setPartnerData(call: PluginCall) {
         val data = AFHelpers.jsonToMap(call.getObject(AF_DATA))
             ?: return call.reject("cannot extract the data value")
@@ -504,7 +519,7 @@ class AppsFlyerPlugin : Plugin() {
 
     }
 
-    @PluginMethod()
+    @PluginMethod
     fun logInvite(call: PluginCall) {
         val data = AFHelpers.jsonToStringMap(call.getObject(AF_EVENT_PARAMETERS))
             ?: return call.reject("cannot extract the eventParameters value")
@@ -515,6 +530,70 @@ class AppsFlyerPlugin : Plugin() {
         ret.put("res", "ok")
         call.resolve(ret)
 
+    }
+
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    fun enableTCFDataCollection(call: PluginCall) {
+        val shouldEnable = call.getBoolean(AF_ENABLE_TCF_DATA_COLLECTION)
+        if (shouldEnable != null) {
+            AppsFlyerLib.getInstance().enableTCFDataCollection(shouldEnable)
+        } else {
+            call.reject("Missing boolean value $AF_ENABLE_TCF_DATA_COLLECTION")
+        }
+    }
+
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    fun setConsentData(call: PluginCall) {
+        val consentData = call.getObject("data") ?: return call.reject("Missing consent data")
+
+        val isUserSubjectToGDPR = consentData.optBoolean(AF_IS_SUBJECTED_TO_GDPR)
+        val hasConsentForDataUsage = consentData.optBoolean(AF_CONSENT_FOR_DATA_USAGE)
+        val hasConsentForAdsPersonalization = consentData.optBoolean(AF_CONSENT_FOR_ADS_PERSONALIZATION)
+
+        val consentObject = if (isUserSubjectToGDPR) {
+            AppsFlyerConsent.forGDPRUser(hasConsentForDataUsage, hasConsentForAdsPersonalization)
+        } else {
+            AppsFlyerConsent.forNonGDPRUser()
+        }
+
+        AppsFlyerLib.getInstance().setConsentData(consentObject)
+
+        call.resolve()
+    }
+
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    fun logAdRevenue(call: PluginCall) {
+        val adRevenueDataJson = call.data ?: return call.reject("adRevenueData is missing, the data mandatory to use this API.")
+
+        // Parse the fields from the adRevenueDataJson object
+        val monetizationNetwork = adRevenueDataJson.getString(AF_MONETIZATION_NETWORK) ?: return call.reject("monetizationNetwork is missing")
+        val currencyIso4217Code = adRevenueDataJson.getString(AF_CURRENCY_ISO4217_CODE) ?: return call.reject("currencyIso4217Code is missing")
+        val revenue = adRevenueDataJson.getDouble(AF_REVENUE)
+        if (revenue.isNaN()) {
+            return call.reject("revenue is missing or not a number")
+        }
+        val additionalParams = AFHelpers.jsonToMap(adRevenueDataJson.getJSObject(AF_ADDITIONAL_PARAMETERS)) // can be nullable
+
+        // Convert the mediationNetwork string to the MediationNetwork enum
+        val mediationNetworkValue = adRevenueDataJson.getString(AF_MEDIATION_NETWORK) ?: return call.reject("mediationNetwork is missing")
+        val mediationNetwork: MediationNetwork
+        try {
+            mediationNetwork = MediationNetwork.valueOf(mediationNetworkValue.uppercase())
+        } catch (e: IllegalArgumentException) {
+            return call.reject("Invalid mediation network")
+        }
+
+        // Create the AFAdRevenueData object
+        val adRevenueData = AFAdRevenueData(
+            monetizationNetwork = monetizationNetwork,
+            mediationNetwork = mediationNetwork,
+            currencyIso4217Code = currencyIso4217Code,
+            revenue = revenue
+        )
+
+        AppsFlyerLib.getInstance().logAdRevenue(adRevenueData, additionalParams)
+
+        call.resolve()
     }
 
     private fun getDeepLinkListener(): DeepLinkListener {
@@ -580,9 +659,7 @@ class AppsFlyerPlugin : Plugin() {
                     put("error", s)
 
                 }
-
                 notifyListeners(OAOA_CALLBACK, res)
-
             }
         }
     }
